@@ -16,7 +16,10 @@ export class Name {
     /** Returns human-readable representation of Name instance */
     // @methodtype conversion-method
     public asNameString(delimiter: string = this.delimiter): string {
-        return this.components.join(delimiter);
+        const escapeDelimiter = this.ESCAPE_CHARACTER.concat(delimiter);
+        return this.components
+            .map(c => c.split(delimiter).join(escapeDelimiter))
+            .join(delimiter);
     }
 
     // @methodtype get-method
