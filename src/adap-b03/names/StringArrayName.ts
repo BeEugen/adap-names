@@ -1,4 +1,3 @@
-import { Name, DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "./Name";
 import { AbstractName } from "./AbstractName";
 
 export class StringArrayName extends AbstractName {
@@ -10,32 +9,32 @@ export class StringArrayName extends AbstractName {
         this.components = other;
     }
 
-    getNoComponents(): number {
+    public getNoComponents(): number {
         return this.components.length;
     }
 
-    getComponent(i: number): string {
+    public getComponent(i: number): string {
         this.assertIsValidIndex(i);
         return this.components[i];
     }
 
-    setComponent(i: number, c: string) {
+    public setComponent(i: number, c: string) {
         this.assertIsValidIndex(i);
         this.components[i] = c;
     }
 
-    insert(i: number, c: string) {
+    public insert(i: number, c: string) {
         if (i < 0 || i > this.components.length) {
             throw new Error("Index out of bounds.");
         }
         this.components.splice(i, 0, c);
     }
 
-    append(c: string) {
+    public append(c: string) {
         this.components.push(c);
     }
 
-    remove(i: number) {
+    public remove(i: number) {
         this.assertIsValidIndex(i);
         this.components.splice(i, 1);
     }

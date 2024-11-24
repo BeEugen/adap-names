@@ -1,61 +1,61 @@
-import { Name, DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "./Name";
+import { ESCAPE_CHARACTER } from "../common/Printable";
 import { AbstractName } from "./AbstractName";
 
 export class StringName extends AbstractName {
 
     protected name: string = "";
-    protected length: number = 0;
+    protected noComponents: number = 0;
 
     constructor(other: string, delimiter?: string) {
         super(delimiter);
         this.name = other;
         if (other !== "") {
-            this.length = this.asComponentArray().length;
+            this.noComponents = this.asComponentArray().length;
         }
     }
 
-    getNoComponents(): number {
-        return this.length;
+    public getNoComponents(): number {
+        return this.noComponents;
     }
 
-    getComponent(i: number): string {
+    public getComponent(i: number): string {
         this.assertIsValidIndex(i);
         const components = this.asComponentArray();
         return components[i];
     }
 
-    setComponent(i: number, c: string) {
+    public setComponent(i: number, c: string) {
         this.assertIsValidIndex(i);
         const components = this.asComponentArray();
         components[i] = c;
         this.name = components.join(this.delimiter);
     }
 
-    insert(i: number, c: string) {
-        if (i < 0 || i > this.length) {
+    public insert(i: number, c: string) {
+        if (i < 0 || i > this.noComponents) {
             throw new Error("Index out of bounds.");
         }
         const components = this.asComponentArray();
         components.splice(i, 0, c);
         this.name = components.join(this.delimiter);
-        this.length++;
+        this.noComponents++;
     }
 
-    append(c: string) {
+    public append(c: string) {
         if (this.isEmpty()) {
             this.name = c;
         } else {
             this.name += this.delimiter + c;
         }
-        this.length++;
+        this.noComponents++;
     }
 
-    remove(i: number) {
+    public remove(i: number) {
         this.assertIsValidIndex(i);
         const components = this.asComponentArray();
         components.splice(i, 1);
         this.name = components.join(this.delimiter);
-        this.length--;
+        this.noComponents--;
     }
 
     private asComponentArray(): string[] {

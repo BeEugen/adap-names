@@ -1,35 +1,46 @@
-import { Name, DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "./Name";
+import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
+import { Name } from "./Name";
 
 export class StringArrayName implements Name {
 
-    protected components: string[] = [];
     protected delimiter: string = DEFAULT_DELIMITER;
+    protected components: string[] = [];
 
     constructor(other: string[], delimiter?: string) {
         this.components = other;
-        if (delimiter) {
-            this.assertIsValidDelimiter(delimiter);
+        if (delimiter === "") {
+            throw new Error("Invalid delimiter: must not be empty string.");
+        }
+        if (delimiter !== undefined) {
             this.delimiter = delimiter;
         }
     }
 
     public asString(delimiter: string = this.delimiter): string {
-        this.assertIsValidDelimiter(delimiter);
         return this.components
-            .map(c => c.split(ESCAPE_CHARACTER).join("")) // unmask components
+            .map(c => this.unmaskComponent(c, this.delimiter))
             .join(delimiter);
     }
 
     public asDataString(): string {
-        return this.components.join(this.delimiter);
-    }
-
-    public isEmpty(): boolean {
-        return this.components.length === 0;
+        if (this.delimiter === DEFAULT_DELIMITER) {
+            return this.components.join(DEFAULT_DELIMITER);
+        } else {
+            // Needs masking adjustment to match the default delimiter
+            return this.components
+                .map(c => this.maskComponent(
+                    this.unmaskComponent(c, this.delimiter),
+                    DEFAULT_DELIMITER))
+                .join(DEFAULT_DELIMITER);
+        }
     }
 
     public getDelimiterCharacter(): string {
         return this.delimiter;
+    }
+
+    public isEmpty(): boolean {
+        return this.components.length === 0;
     }
 
     public getNoComponents(): number {
@@ -63,37 +74,28 @@ export class StringArrayName implements Name {
     }
 
     public concat(other: Name): void {
-        if (other.isEmpty()) {
-            return;
-        }
-        const otherName = other.asDataString();
         const otherDelimiter = other.getDelimiterCharacter();
-        let otherComponents = this.split(otherName, otherDelimiter);
-        // Replace other delimiter by this delimiter
-        otherComponents = otherComponents.map(c => c.split(otherDelimiter).join(this.delimiter));
-        this.components = this.components.concat(otherComponents);
-    }
+        const needsMaskingAdjustment = this.delimiter !== otherDelimiter;
 
-    private split(name: string, delimiter: string): string[] {
-        // Escape special characters for use in a regular expression
-        const escapedDelimiter = this.escapeRegexInput(delimiter);
-        const escapedEscapeCharacter = this.escapeRegexInput(ESCAPE_CHARACTER);
-
-        // Create a regular expression that matches the delimiter, but avoids those preceded by the escape character
-        const regex = new RegExp(`(?<!${escapedEscapeCharacter})${escapedDelimiter}`, 'g');
-        const components = name.split(regex);
-        return components.length > 1 ? components : [name];
-    }
-
-    // Escape all special characters in the input string for use in a regular expression
-    private escapeRegexInput(input: string): string {
-        return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    }
-
-    private assertIsValidDelimiter(delimiter: string): void {
-        if (delimiter === "") {
-            throw new Error("Invalid delimiter: must not be empty string.");
+        for (let i = 0; i < other.getNoComponents(); i++) {
+            let component = other.getComponent(i);
+            if (needsMaskingAdjustment) {
+                // Adjust masking to match the delimiter of this Name instance
+                component = this.maskComponent(
+                    this.unmaskComponent(component, otherDelimiter),
+                    this.delimiter
+                );
+            }
+            this.append(component);
         }
+    }
+
+    private unmaskComponent(c: string, delimiter: string): string {
+        return c.replaceAll(ESCAPE_CHARACTER + delimiter, delimiter);
+    }
+
+    private maskComponent(c: string, delimiter: string): string {
+        return c.replaceAll(delimiter, ESCAPE_CHARACTER + delimiter);
     }
 
     private assertIsValidIndex(i: number): void {

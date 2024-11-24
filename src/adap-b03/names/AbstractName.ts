@@ -1,4 +1,5 @@
-import { Name, DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "./Name";
+import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
+import { Name } from "./Name";
 
 export abstract class AbstractName implements Name {
 
@@ -11,6 +12,11 @@ export abstract class AbstractName implements Name {
         if (delimiter !== undefined) {
             this.delimiter = delimiter;
         }
+    }
+
+    // Returns shallow copy (clone) of this object
+    public clone(): Name {
+        return Object.create(this);
     }
 
     public asString(delimiter: string = this.delimiter): string {
@@ -31,15 +37,25 @@ export abstract class AbstractName implements Name {
     }
 
     public asDataString(): string {
+        const needsMaskingAdjustment = this.delimiter !== DEFAULT_DELIMITER;
         let resultString = "";
+
         for (let i = 0; i < this.getNoComponents(); i++) {
-            const maskedComponent = this.getComponent(i);
+            let component = this.getComponent(i);
+            if (needsMaskingAdjustment) {
+                // Adjust masking to match the default delimiter
+                component = this.maskComponent(
+                    this.unmaskComponent(component, this.delimiter),
+                    DEFAULT_DELIMITER
+                );
+            }
             if (i === 0) {
-                resultString += maskedComponent;
+                resultString = component;
             } else {
-                resultString += this.delimiter + maskedComponent;
+                resultString += DEFAULT_DELIMITER + component;
             }
         }
+
         return resultString;
     }
 
@@ -57,11 +73,6 @@ export abstract class AbstractName implements Name {
             hashCode |= 0;
         }
         return hashCode;
-    }
-
-    // Returns shallow copy (clone) of this object
-    public clone(): Name {
-        return Object.create(this);
     }
 
     public isEmpty(): boolean {
@@ -82,24 +93,19 @@ export abstract class AbstractName implements Name {
     abstract remove(i: number): void;
 
     public concat(other: Name): void {
-        const count = other.getNoComponents();
         const otherDelimiter = other.getDelimiterCharacter();
+        const needsMaskingAdjustment = this.delimiter !== otherDelimiter;
 
-        if (this.delimiter === otherDelimiter) {
-            // Masking is already correct
-            for (let i = 0; i < count; i++) {
-                this.append(other.getComponent(i));
+        for (let i = 0; i < other.getNoComponents(); i++) {
+            let component = other.getComponent(i);
+            if (needsMaskingAdjustment) {
+                // Adjust masking to match the delimiter of this Name instance
+                component = this.maskComponent(
+                    this.unmaskComponent(component, otherDelimiter),
+                    this.delimiter
+                );
             }
-        } else {
-            // Masking needs to be adjusted
-            for (let i = 0; i < count; i++) {
-                const otherComponent = other.getComponent(i);
-                // Remove escape character from other delimiter and add escape character to this delimiter
-                const preparedComponent = this.maskComponent(
-                    this.unmaskComponent(otherComponent, otherDelimiter),
-                    this.delimiter);
-                this.append(preparedComponent);
-            }
+            this.append(component);
         }
     }
 
