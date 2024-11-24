@@ -1,5 +1,4 @@
-import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
-import { Name } from "./Name";
+import { ESCAPE_CHARACTER } from "../common/Printable";
 import { AbstractName } from "./AbstractName";
 
 export class StringName extends AbstractName {
@@ -8,68 +7,70 @@ export class StringName extends AbstractName {
     protected noComponents: number = 0;
 
     constructor(other: string, delimiter?: string) {
-        super();
-        throw new Error("needs implementation");
-    }
-
-    public clone(): Name {
-        throw new Error("needs implementation");
-    }
-
-    public asString(delimiter: string = this.delimiter): string {
-        throw new Error("needs implementation");
-    }
-
-    public toString(): string {
-        throw new Error("needs implementation");
-    }
-
-    public asDataString(): string {
-        throw new Error("needs implementation");
-    }
-
-    public isEqual(other: Name): boolean {
-        throw new Error("needs implementation");
-    }
-
-    public getHashCode(): number {
-        throw new Error("needs implementation");
-    }
-
-    public isEmpty(): boolean {
-        throw new Error("needs implementation");
-    }
-
-    public getDelimiterCharacter(): string {
-        throw new Error("needs implementation");
+        super(delimiter);
+        this.name = other;
+        if (other !== "") {
+            this.noComponents = this.asComponentArray().length;
+        }
     }
 
     public getNoComponents(): number {
-        throw new Error("needs implementation");
+        return this.noComponents;
     }
 
     public getComponent(i: number): string {
-        throw new Error("needs implementation");
+        this.assertIsValidIndex(i);
+        const components = this.asComponentArray();
+        return components[i];
     }
 
     public setComponent(i: number, c: string) {
-        throw new Error("needs implementation");
+        this.assertIsValidIndex(i);
+        const components = this.asComponentArray();
+        components[i] = c;
+        this.name = components.join(this.delimiter);
     }
 
     public insert(i: number, c: string) {
-        throw new Error("needs implementation");
+        if (i < 0 || i > this.noComponents) {
+            throw new Error("Index out of bounds.");
+        }
+        const components = this.asComponentArray();
+        components.splice(i, 0, c);
+        this.name = components.join(this.delimiter);
+        this.noComponents++;
     }
 
     public append(c: string) {
-        throw new Error("needs implementation");
+        if (this.isEmpty()) {
+            this.name = c;
+        } else {
+            this.name += this.delimiter + c;
+        }
+        this.noComponents++;
     }
 
     public remove(i: number) {
-        throw new Error("needs implementation");
+        this.assertIsValidIndex(i);
+        const components = this.asComponentArray();
+        components.splice(i, 1);
+        this.name = components.join(this.delimiter);
+        this.noComponents--;
     }
 
-    public concat(other: Name): void {
-        throw new Error("needs implementation");
+    private asComponentArray(): string[] {
+        // Escape special characters for use in a regular expression
+        const escapedDelimiter = this.escapeRegexInput(this.delimiter);
+        const escapedEscapeCharacter = this.escapeRegexInput(ESCAPE_CHARACTER);
+
+        // Create a regular expression that matches the delimiter, but avoids those preceded by the escape character
+        const regex = new RegExp(`(?<!${escapedEscapeCharacter})${escapedDelimiter}`, 'g');
+        return this.name.split(regex);
+    }
+
+    // Escape all special characters in the input string for use in a regular expression
+    private escapeRegexInput(input: string): string {
+        return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     }
 
 }
