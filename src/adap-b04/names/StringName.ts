@@ -1,5 +1,8 @@
 import { ESCAPE_CHARACTER } from "../common/Printable";
 import { AbstractName } from "./AbstractName";
+import { IllegalArgumentException } from "../common/IllegalArgumentException";
+import { MethodFailureException } from "../common/MethodFailureException";
+import { InvalidStateException } from "../common/InvalidStateException";
 
 export class StringName extends AbstractName {
 
@@ -12,50 +15,143 @@ export class StringName extends AbstractName {
         if (other !== "") {
             this.noComponents = this.asComponentArray().length;
         }
+
+        // Class Invariants
+        this.assertClassInvariants();
     }
 
     public getNoComponents(): number {
-        return this.noComponents;
+        // Class Invariants
+        this.assertClassInvariants();
+
+        const result = this.noComponents;
+
+        // Postconditions
+        this.assertIsValidNoComponentsAsPostcondition(result);
+        // Class Invariants
+        this.assertClassInvariants();
+        return result;
     }
 
     public getComponent(i: number): string {
-        this.assertIsValidIndex(i);
+        // Class Invariants
+        this.assertClassInvariants();
+        // Precondition
+        this.assertIsValidIndexAsPrecondition(i);
+
         const components = this.asComponentArray();
-        return components[i];
+        const result = components[i];
+
+        // Postconditions
+        this.assertIsValidComponentAsPostcondition(result);
+        // Class Invariants
+        this.assertClassInvariants();
+        return result;
     }
 
     public setComponent(i: number, c: string) {
-        this.assertIsValidIndex(i);
+        // Class Invariants
+        this.assertClassInvariants();
+        // Preconditions
+        this.assertIsValidIndexAsPrecondition(i);
+        this.assertIsValidComponentAsPrecondition(c);
+        // Create Backup for Postcondition
+        const backup = this.createBackup();
+
         const components = this.asComponentArray();
         components[i] = c;
         this.name = components.join(this.delimiter);
+
+        // Postconditions
+        MethodFailureException.assertCondition(
+            this.noComponents === backup.noComponents,
+            "Set new Name component failed."
+        );
+        MethodFailureException.assertCondition(
+            this.getComponent(i) === c,
+            "Set new Name component failed."
+        );
+        // Class Invariants
+        this.assertClassInvariants();
     }
 
     public insert(i: number, c: string) {
-        if (i < 0 || i > this.noComponents) {
-            throw new Error("Index out of bounds.");
-        }
+        // Class Invariants
+        this.assertClassInvariants();
+        // Preconditions
+        IllegalArgumentException.assertCondition(
+            (i >= 0 && i <= this.noComponents),
+            "Index out of bounds.");
+        this.assertIsValidComponentAsPrecondition(c);
+        // Create Backup for Postcondition
+        const backup = this.createBackup();
+
         const components = this.asComponentArray();
         components.splice(i, 0, c);
         this.name = components.join(this.delimiter);
         this.noComponents++;
+
+        // Postconditions
+        MethodFailureException.assertCondition(
+            this.noComponents === backup.noComponents + 1,
+            "Insert new Name component failed."
+        );
+        MethodFailureException.assertCondition(
+            this.getComponent(i) === c,
+            "Insert new Name component failed."
+        );
+        // Class Invariants
+        this.assertClassInvariants();
     }
 
     public append(c: string) {
+        // Class Invariants
+        this.assertClassInvariants();
+        // Precondition
+        this.assertIsValidComponentAsPrecondition(c);
+        // Create Backup for Postcondition
+        const backup = this.createBackup();
+
         if (this.isEmpty()) {
             this.name = c;
         } else {
             this.name += this.delimiter + c;
         }
         this.noComponents++;
+
+        // Postconditions
+        MethodFailureException.assertCondition(
+            this.noComponents === backup.noComponents + 1,
+            "Insert new Name component failed."
+        );
+        MethodFailureException.assertCondition(
+            this.getComponent(backup.noComponents) === c,
+            "Insert new Name component failed."
+        );
+        // Class Invariants
+        this.assertClassInvariants();
     }
 
     public remove(i: number) {
-        this.assertIsValidIndex(i);
+        // Class Invariants
+        this.assertClassInvariants();
+        // Precondition
+        this.assertIsValidIndexAsPrecondition(i);
+        // Create Backup for Postcondition
+        const backup = this.createBackup();
+
         const components = this.asComponentArray();
         components.splice(i, 1);
         this.name = components.join(this.delimiter);
         this.noComponents--;
+
+        // Postconditions
+        MethodFailureException.assertCondition(
+            this.noComponents === backup.noComponents - 1,
+            "Insert new Name component failed."
+        );
+        // Class Invariants
+        this.assertClassInvariants();
     }
 
     private asComponentArray(): string[] {
@@ -63,14 +159,42 @@ export class StringName extends AbstractName {
         const escapedDelimiter = this.escapeRegexInput(this.delimiter);
         const escapedEscapeCharacter = this.escapeRegexInput(ESCAPE_CHARACTER);
 
-        // Create a regular expression that matches the delimiter, but avoids those preceded by the escape character
+        // Create a regular expression that matches all unescaped delimiter characters
         const regex = new RegExp(`(?<!${escapedEscapeCharacter})${escapedDelimiter}`, 'g');
         return this.name.split(regex);
     }
 
-    // Escape all special characters in the input string for use in a regular expression
-    private escapeRegexInput(input: string): string {
-        return input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    private assertIsValidIndexAsPrecondition(i: number): void {
+        let condition: boolean = (i >= 0 && i < this.noComponents);
+        IllegalArgumentException.assertCondition(condition, "Index out of bounds.");
+    }
+
+    protected assertClassInvariants(): void {
+        this.assertIsValidDelimiterAsClassInvariant();
+        this.assertIsValidNameAsClassInvariant();
+        this.assertIsValidNoComponentsAsClassInvariant();
+    }
+
+    private assertIsValidNameAsClassInvariant(): void {
+        InvalidStateException.assertIsNotNullOrUndefined(
+            this.name,
+            "Name must not be null or undefined."
+        );
+    }
+
+    private assertIsValidNoComponentsAsClassInvariant(): void {
+        InvalidStateException.assertCondition(
+            this.noComponents >= 0,
+            "Number of Name components must not be a negative value."
+        );
+    }
+
+    private createBackup(): { name: string; delimiter: string, noComponents: number } {
+        return {
+            name: this.name,
+            delimiter: this.delimiter,
+            noComponents: this.noComponents
+        };
     }
 
 }
