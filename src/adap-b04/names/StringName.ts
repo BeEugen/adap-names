@@ -1,7 +1,7 @@
 import { ESCAPE_CHARACTER } from "../common/Printable";
 import { AbstractName } from "./AbstractName";
 import { IllegalArgumentException } from "../common/IllegalArgumentException";
-import { MethodFailureException } from "../common/MethodFailureException";
+import { MethodFailedException } from "../common/MethodFailedException";
 import { InvalidStateException } from "../common/InvalidStateException";
 
 export class StringName extends AbstractName {
@@ -63,11 +63,11 @@ export class StringName extends AbstractName {
         this.name = components.join(this.delimiter);
 
         // Postconditions
-        MethodFailureException.assertCondition(
+        MethodFailedException.assertCondition(
             this.noComponents === backup.noComponents,
             "Set new Name component failed."
         );
-        MethodFailureException.assertCondition(
+        MethodFailedException.assertCondition(
             this.getComponent(i) === c,
             "Set new Name component failed."
         );
@@ -92,11 +92,11 @@ export class StringName extends AbstractName {
         this.noComponents++;
 
         // Postconditions
-        MethodFailureException.assertCondition(
+        MethodFailedException.assertCondition(
             this.noComponents === backup.noComponents + 1,
             "Insert new Name component failed."
         );
-        MethodFailureException.assertCondition(
+        MethodFailedException.assertCondition(
             this.getComponent(i) === c,
             "Insert new Name component failed."
         );
@@ -120,11 +120,11 @@ export class StringName extends AbstractName {
         this.noComponents++;
 
         // Postconditions
-        MethodFailureException.assertCondition(
+        MethodFailedException.assertCondition(
             this.noComponents === backup.noComponents + 1,
             "Insert new Name component failed."
         );
-        MethodFailureException.assertCondition(
+        MethodFailedException.assertCondition(
             this.getComponent(backup.noComponents) === c,
             "Insert new Name component failed."
         );
@@ -146,7 +146,7 @@ export class StringName extends AbstractName {
         this.noComponents--;
 
         // Postconditions
-        MethodFailureException.assertCondition(
+        MethodFailedException.assertCondition(
             this.noComponents === backup.noComponents - 1,
             "Insert new Name component failed."
         );

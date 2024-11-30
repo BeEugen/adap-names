@@ -1,7 +1,7 @@
 import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
 import { Name } from "./Name";
 import { IllegalArgumentException } from "../common/IllegalArgumentException";
-import { MethodFailureException } from "../common/MethodFailureException";
+import { MethodFailedException } from "../common/MethodFailedException";
 import { InvalidStateException } from "../common/InvalidStateException";
 
 export abstract class AbstractName implements Name {
@@ -23,7 +23,7 @@ export abstract class AbstractName implements Name {
         const result = Object.create(this);
 
         // Postcondition
-        MethodFailureException.assertIsNotNullOrUndefined(result);
+        MethodFailedException.assertIsNotNullOrUndefined(result);
         // Class Invariants
         this.assertClassInvariants();
         return result;
@@ -46,7 +46,7 @@ export abstract class AbstractName implements Name {
         }
 
         // Postcondition
-        MethodFailureException.assertIsNotNullOrUndefined(resultString);
+        MethodFailedException.assertIsNotNullOrUndefined(resultString);
         // Class Invariants
         this.assertClassInvariants();
         return resultString;
@@ -59,7 +59,7 @@ export abstract class AbstractName implements Name {
         const result = this.asDataString();
 
         // Postcondition
-        MethodFailureException.assertIsNotNullOrUndefined(result);
+        MethodFailedException.assertIsNotNullOrUndefined(result);
         // Class Invariants
         this.assertClassInvariants();
         return result;
@@ -89,7 +89,7 @@ export abstract class AbstractName implements Name {
         }
 
         // Postcondition
-        MethodFailureException.assertIsNotNullOrUndefined(resultString);
+        MethodFailedException.assertIsNotNullOrUndefined(resultString);
         // Class Invariants
         this.assertClassInvariants();
         return resultString;
@@ -196,8 +196,8 @@ export abstract class AbstractName implements Name {
     }
 
     protected assertIsValidDelimiterAsPostcondition(delimiter: string): void {
-        MethodFailureException.assertIsNotNullOrUndefined(delimiter, "Delimiter must not be null or undefined.");
-        MethodFailureException.assertCondition((this.delimiter.length === 1), "Delimiter must be a single character.");
+        MethodFailedException.assertIsNotNullOrUndefined(delimiter, "Delimiter must not be null or undefined.");
+        MethodFailedException.assertCondition((this.delimiter.length === 1), "Delimiter must be a single character.");
     }
 
     protected assertIsValidComponentAsPrecondition(c: string): void {
@@ -206,8 +206,8 @@ export abstract class AbstractName implements Name {
     }
 
     protected assertIsValidComponentAsPostcondition(c: string): void {
-        MethodFailureException.assertIsNotNullOrUndefined(c, "Name component must not be null or undefined.");
-        MethodFailureException.assertCondition(this.isValidComponent(c), "Name component must be properly masked.");
+        MethodFailedException.assertIsNotNullOrUndefined(c, "Name component must not be null or undefined.");
+        MethodFailedException.assertCondition(this.isValidComponent(c), "Name component must be properly masked.");
     }
 
     protected assertIsValidDelimiterAsClassInvariant(): void {
@@ -216,7 +216,7 @@ export abstract class AbstractName implements Name {
     }
 
     protected assertIsValidNoComponentsAsPostcondition(noComponents: number) {
-        MethodFailureException.assertCondition(noComponents >= 0, "Number of Name components must not be a negative value.");
+        MethodFailedException.assertCondition(noComponents >= 0, "Number of Name components must not be a negative value.");
     }
 
     protected isValidComponent(c: string): boolean {

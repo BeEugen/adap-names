@@ -1,6 +1,6 @@
 import { AbstractName } from "./AbstractName";
 import { IllegalArgumentException } from "../common/IllegalArgumentException";
-import { MethodFailureException } from "../common/MethodFailureException";
+import { MethodFailedException } from "../common/MethodFailedException";
 import { InvalidStateException } from "../common/InvalidStateException";
 
 export class StringArrayName extends AbstractName {
@@ -66,11 +66,11 @@ export class StringArrayName extends AbstractName {
         this.components[i] = c;
 
         // Postconditions
-        MethodFailureException.assertCondition(
+        MethodFailedException.assertCondition(
             this.components.length === backup.components.length,
             "Set new Name component failed."
         );
-        MethodFailureException.assertCondition(
+        MethodFailedException.assertCondition(
             this.components[i] === c,
             "Set new Name component failed."
         );
@@ -92,11 +92,11 @@ export class StringArrayName extends AbstractName {
         this.components.splice(i, 0, c);
 
         // Postconditions
-        MethodFailureException.assertCondition(
+        MethodFailedException.assertCondition(
             this.components.length === backup.components.length + 1,
             "Insert new Name component failed."
         );
-        MethodFailureException.assertCondition(
+        MethodFailedException.assertCondition(
             this.components[i] === c,
             "Insert new Name component failed."
         );
@@ -115,11 +115,11 @@ export class StringArrayName extends AbstractName {
         this.components.push(c);
 
         // Postconditions
-        MethodFailureException.assertCondition(
+        MethodFailedException.assertCondition(
             this.components.length === backup.components.length + 1,
             "Insert new Name component failed."
         );
-        MethodFailureException.assertCondition(
+        MethodFailedException.assertCondition(
             this.components[backup.components.length] === c,
             "Insert new Name component failed."
         );
@@ -138,7 +138,7 @@ export class StringArrayName extends AbstractName {
         this.components.splice(i, 1);
 
         // Postconditions
-        MethodFailureException.assertCondition(
+        MethodFailedException.assertCondition(
             this.components.length === backup.components.length - 1,
             "Insert new Name component failed."
         );
