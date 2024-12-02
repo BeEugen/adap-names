@@ -21,6 +21,8 @@ export class RootNode extends Directory {
     }
 
     public getFullName(): Name {
+        this.assertClassInvariants();
+
         return new StringName("", '/');
     }
 

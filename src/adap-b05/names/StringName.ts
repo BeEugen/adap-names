@@ -1,6 +1,9 @@
 import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
 import { Name } from "./Name";
 import { AbstractName } from "./AbstractName";
+import { IllegalArgumentException } from "../common/IllegalArgumentException";
+import { MethodFailedException } from "../common/MethodFailedException";
+import { InvalidStateException } from "../common/InvalidStateException";
 
 export class StringName extends AbstractName {
 
@@ -8,64 +11,191 @@ export class StringName extends AbstractName {
     protected noComponents: number = 0;
 
     constructor(other: string, delimiter?: string) {
-        super();
-        throw new Error("needs implementation or deletion");
-    }
+        super(delimiter);
+        this.name = other;
+        if (other !== "") {
+            this.noComponents = this.asComponentArray().length;
+        }
 
-    public clone(): Name {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public asString(delimiter: string = this.delimiter): string {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public asDataString(): string {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public isEqual(other: Name): boolean {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public getHashCode(): number {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public isEmpty(): boolean {
-        throw new Error("needs implementation or deletion");
-    }
-
-    public getDelimiterCharacter(): string {
-        throw new Error("needs implementation or deletion");
+        // Class Invariants
+        this.assertClassInvariants();
     }
 
     public getNoComponents(): number {
-        throw new Error("needs implementation or deletion");
+        // Class Invariants
+        this.assertClassInvariants();
+
+        const result = this.noComponents;
+
+        // Postconditions
+        this.assertIsValidNoComponentsAsPostcondition(result);
+        // Class Invariants
+        this.assertClassInvariants();
+        return result;
     }
 
     public getComponent(i: number): string {
-        throw new Error("needs implementation or deletion");
+        // Class Invariants
+        this.assertClassInvariants();
+        // Precondition
+        this.assertIsValidIndexAsPrecondition(i);
+
+        const components = this.asComponentArray();
+        const result = components[i];
+
+        // Postconditions
+        this.assertIsValidComponentAsPostcondition(result);
+        // Class Invariants
+        this.assertClassInvariants();
+        return result;
     }
 
     public setComponent(i: number, c: string) {
-        throw new Error("needs implementation or deletion");
+        // Class Invariants
+        this.assertClassInvariants();
+        // Preconditions
+        this.assertIsValidIndexAsPrecondition(i);
+        this.assertIsValidComponentAsPrecondition(c);
+        // Create Backup for Postcondition
+        const backup = this.createBackup();
+
+        const components = this.asComponentArray();
+        components[i] = c;
+        this.name = components.join(this.delimiter);
+
+        // Postconditions
+        MethodFailedException.assertCondition(
+            this.noComponents === backup.noComponents,
+            "Set new Name component failed."
+        );
+        MethodFailedException.assertCondition(
+            this.getComponent(i) === c,
+            "Set new Name component failed."
+        );
+        // Class Invariants
+        this.assertClassInvariants();
     }
 
     public insert(i: number, c: string) {
-        throw new Error("needs implementation or deletion");
+        // Class Invariants
+        this.assertClassInvariants();
+        // Preconditions
+        IllegalArgumentException.assertCondition(
+            (i >= 0 && i <= this.noComponents),
+            "Index out of bounds.");
+        this.assertIsValidComponentAsPrecondition(c);
+        // Create Backup for Postcondition
+        const backup = this.createBackup();
+
+        const components = this.asComponentArray();
+        components.splice(i, 0, c);
+        this.name = components.join(this.delimiter);
+        this.noComponents++;
+
+        // Postconditions
+        MethodFailedException.assertCondition(
+            this.noComponents === backup.noComponents + 1,
+            "Insert new Name component failed."
+        );
+        MethodFailedException.assertCondition(
+            this.getComponent(i) === c,
+            "Insert new Name component failed."
+        );
+        // Class Invariants
+        this.assertClassInvariants();
     }
 
     public append(c: string) {
-        throw new Error("needs implementation or deletion");
+        // Class Invariants
+        this.assertClassInvariants();
+        // Precondition
+        this.assertIsValidComponentAsPrecondition(c);
+        // Create Backup for Postcondition
+        const backup = this.createBackup();
+
+        if (this.isEmpty()) {
+            this.name = c;
+        } else {
+            this.name += this.delimiter + c;
+        }
+        this.noComponents++;
+
+        // Postconditions
+        MethodFailedException.assertCondition(
+            this.noComponents === backup.noComponents + 1,
+            "Insert new Name component failed."
+        );
+        MethodFailedException.assertCondition(
+            this.getComponent(backup.noComponents) === c,
+            "Insert new Name component failed."
+        );
+        // Class Invariants
+        this.assertClassInvariants();
     }
 
     public remove(i: number) {
-        throw new Error("needs implementation or deletion");
+        // Class Invariants
+        this.assertClassInvariants();
+        // Precondition
+        this.assertIsValidIndexAsPrecondition(i);
+        // Create Backup for Postcondition
+        const backup = this.createBackup();
+
+        const components = this.asComponentArray();
+        components.splice(i, 1);
+        this.name = components.join(this.delimiter);
+        this.noComponents--;
+
+        // Postconditions
+        MethodFailedException.assertCondition(
+            this.noComponents === backup.noComponents - 1,
+            "Insert new Name component failed."
+        );
+        // Class Invariants
+        this.assertClassInvariants();
     }
 
-    public concat(other: Name): void {
-        throw new Error("needs implementation or deletion");
+    private asComponentArray(): string[] {
+        // Escape special characters for use in a regular expression
+        const escapedDelimiter = this.escapeRegexInput(this.delimiter);
+        const escapedEscapeCharacter = this.escapeRegexInput(ESCAPE_CHARACTER);
+
+        // Create a regular expression that matches all unescaped delimiter characters
+        const regex = new RegExp(`(?<!${escapedEscapeCharacter})${escapedDelimiter}`, 'g');
+        return this.name.split(regex);
+    }
+
+    private assertIsValidIndexAsPrecondition(i: number): void {
+        let condition: boolean = (i >= 0 && i < this.noComponents);
+        IllegalArgumentException.assertCondition(condition, "Index out of bounds.");
+    }
+
+    protected assertClassInvariants(): void {
+        this.assertIsValidDelimiterAsClassInvariant();
+        this.assertIsValidNameAsClassInvariant();
+        this.assertIsValidNoComponentsAsClassInvariant();
+    }
+
+    private assertIsValidNameAsClassInvariant(): void {
+        InvalidStateException.assertIsNotNullOrUndefined(
+            this.name,
+            "Name must not be null or undefined."
+        );
+    }
+
+    private assertIsValidNoComponentsAsClassInvariant(): void {
+        InvalidStateException.assertCondition(
+            this.noComponents >= 0,
+            "Number of Name components must not be a negative value."
+        );
+    }
+
+    private createBackup(): { name: string; delimiter: string, noComponents: number } {
+        return {
+            name: this.name,
+            delimiter: this.delimiter,
+            noComponents: this.noComponents
+        };
     }
 
 }
