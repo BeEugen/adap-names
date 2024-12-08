@@ -1,5 +1,5 @@
 import { Node } from "./Node";
-import { ExceptionType, AssertionDispatcher } from "../common/AssertionDispatcher";
+import { IllegalArgumentException } from "../common/IllegalArgumentException";
 
 export class Directory extends Node {
 
@@ -9,24 +9,42 @@ export class Directory extends Node {
         super(bn, pn);
     }
 
-    public add(cn: Node): void {
+    public hasChildNode(cn: Node): boolean {
+        // Class Invariants
         this.assertClassInvariants();
+        // Preconditions
+        this.assertIsNotNullOrUndefinedAsPrecondition(cn);
+
+        return this.childNodes.has(cn);
+    }
+
+    public addChildNode(cn: Node): void {
+        // Class Invariants
+        this.assertClassInvariants();
+        // Preconditions
+        this.assertIsNotNullOrUndefinedAsPrecondition(cn);
 
         this.childNodes.add(cn);
 
+        // Class Invariants
         this.assertClassInvariants();
     }
 
-    public remove(cn: Node): void {
+    public removeChildNode(cn: Node): void {
+        // Class Invariants
         this.assertClassInvariants();
-        AssertionDispatcher.dispatch(ExceptionType.PRECONDITION, this.childNodes.has(cn), "Node must be a child node to be removed.");
+        // Preconditions
+        this.assertIsNotNullOrUndefinedAsPrecondition(cn);
+        IllegalArgumentException.assert(this.hasChildNode(cn), "Node must be child node to be removed.");
 
         this.childNodes.delete(cn); // Yikes! Should have been called remove
 
+        // Class Invariants
         this.assertClassInvariants();
     }
 
     public findNodesUnchecked(bn: string): Set<Node> {
+        // Class Invariants
         this.assertClassInvariants();
 
         const result: Set<Node> = new Set<Node>();
@@ -38,6 +56,7 @@ export class Directory extends Node {
             matches.forEach(match => result.add(match));
         }
 
+        // Class Invariants
         this.assertClassInvariants();
         return result;
     }

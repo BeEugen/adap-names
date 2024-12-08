@@ -13,16 +13,12 @@ export class File extends Node {
     protected state: FileState = FileState.CLOSED;
 
     constructor(baseName: string, parent: Directory) {
-        IllegalArgumentException.assertIsNotNullOrUndefined(baseName);
-        IllegalArgumentException.assertIsNotNullOrUndefined(parent);
-        IllegalArgumentException.assertCondition(!baseName.includes("/"), "Base name must not contain '/' character.");
-        IllegalArgumentException.assertCondition(baseName.trim() !== "", "Base name must not be empty string.");
-
         super(baseName, parent);
     }
 
     public open(): void {
-        IllegalArgumentException.assertCondition(this.doGetFileState() === FileState.CLOSED, "File must be closed before it can be opened.");
+        // Preconditions
+        IllegalArgumentException.assert(this.doGetFileState() === FileState.CLOSED, "File must be closed before it can be opened.");
 
         // do something
     }
@@ -33,7 +29,8 @@ export class File extends Node {
     }
 
     public close(): void {
-        IllegalArgumentException.assertCondition(this.doGetFileState() === FileState.OPEN, "File must be open before it can be closed.");
+        // Preconditions
+        IllegalArgumentException.assert(this.doGetFileState() === FileState.OPEN, "File must be open before it can be closed.");
 
         // do something
     }

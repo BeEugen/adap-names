@@ -9,20 +9,20 @@ export class StringArrayName extends AbstractName {
 
     protected components: string[] = [];
 
-    constructor(other: string[], delimiter?: string) {
+    constructor(source: string[], delimiter?: string) {
         // 'super' must be called before accessing 'this' in the constructor of a derived class
         // and therefore before the precondition check
         super(delimiter);
 
         // Precondition
-        for (let i = 0; i < other.length; i++) {
-            IllegalArgumentException.assertCondition(
-                this.isValidComponent(other[i]),
+        for (let i = 0; i < source.length; i++) {
+            IllegalArgumentException.assert(
+                this.isValidComponent(source[i]),
                 "Name components must be properly masked."
             );
         }
 
-        this.components = other;
+        this.components = source;
 
         // Class Invariants
         this.assertClassInvariants();
@@ -68,11 +68,11 @@ export class StringArrayName extends AbstractName {
         this.components[i] = c;
 
         // Postconditions
-        MethodFailedException.assertCondition(
+        MethodFailedException.assert(
             this.components.length === backup.components.length,
             "Set new Name component failed."
         );
-        MethodFailedException.assertCondition(
+        MethodFailedException.assert(
             this.components[i] === c,
             "Set new Name component failed."
         );
@@ -84,7 +84,7 @@ export class StringArrayName extends AbstractName {
         // Class Invariants
         this.assertClassInvariants();
         // Preconditions
-        IllegalArgumentException.assertCondition(
+        IllegalArgumentException.assert(
             (i >= 0 && i <= this.components.length),
             "Index out of bounds.");
         this.assertIsValidComponentAsPrecondition(c);
@@ -94,11 +94,11 @@ export class StringArrayName extends AbstractName {
         this.components.splice(i, 0, c);
 
         // Postconditions
-        MethodFailedException.assertCondition(
+        MethodFailedException.assert(
             this.components.length === backup.components.length + 1,
             "Insert new Name component failed."
         );
-        MethodFailedException.assertCondition(
+        MethodFailedException.assert(
             this.components[i] === c,
             "Insert new Name component failed."
         );
@@ -117,11 +117,11 @@ export class StringArrayName extends AbstractName {
         this.components.push(c);
 
         // Postconditions
-        MethodFailedException.assertCondition(
+        MethodFailedException.assert(
             this.components.length === backup.components.length + 1,
             "Insert new Name component failed."
         );
-        MethodFailedException.assertCondition(
+        MethodFailedException.assert(
             this.components[backup.components.length] === c,
             "Insert new Name component failed."
         );
@@ -140,7 +140,7 @@ export class StringArrayName extends AbstractName {
         this.components.splice(i, 1);
 
         // Postconditions
-        MethodFailedException.assertCondition(
+        MethodFailedException.assert(
             this.components.length === backup.components.length - 1,
             "Insert new Name component failed."
         );
@@ -150,7 +150,7 @@ export class StringArrayName extends AbstractName {
 
     private assertIsValidIndexAsPrecondition(i: number): void {
         let condition: boolean = (i >= 0 && i < this.components.length);
-        IllegalArgumentException.assertCondition(condition, "Index out of bounds.");
+        IllegalArgumentException.assert(condition, "Index out of bounds.");
     }
 
     protected assertClassInvariants(): void {
@@ -159,16 +159,16 @@ export class StringArrayName extends AbstractName {
     }
 
     private assertIsValidComponentsAsClassInvariant(): void {
-        InvalidStateException.assertIsNotNullOrUndefined(
-            this.components,
+        InvalidStateException.assert(
+            (this.components !== null) && (this.components !== undefined),
             "Name components must not be null or undefined."
         );
         for (let i = 0; i < this.components.length; i++) {
-            InvalidStateException.assertIsNotNullOrUndefined(
-                this.components[i],
-                "Name components must not be null or undefined."
+            InvalidStateException.assert(
+                (this.components[i] !== null) && (this.components[i] !== undefined),
+                "Name component must not be null or undefined."
             );
-            InvalidStateException.assertCondition(
+            InvalidStateException.assert(
                 this.isValidComponent(this.components[i]),
                 "Name components must be properly masked."
             );

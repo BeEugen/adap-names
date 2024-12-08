@@ -1,8 +1,7 @@
-import { ExceptionType, AssertionDispatcher } from "../common/AssertionDispatcher";
-
 import { Name } from "../names/Name";
 import { StringName } from "../names/StringName";
 import { Directory } from "./Directory";
+import { InvalidStateException } from "../common/InvalidStateException";
 
 export class RootNode extends Directory {
 
@@ -21,6 +20,7 @@ export class RootNode extends Directory {
     }
 
     public getFullName(): Name {
+        // Class Invariants
         this.assertClassInvariants();
 
         return new StringName("", '/');
@@ -34,9 +34,9 @@ export class RootNode extends Directory {
         // null operation
     }
 
-    protected assertIsValidBaseName(bn: string, et: ExceptionType): void {
-        const condition: boolean = (bn == ""); // Root must have "" as base name
-        AssertionDispatcher.dispatch(et, condition, "invalid base name");
+    protected assertClassInvariants(): void {
+        const condition: boolean = (this.doGetBaseName() === "");
+        InvalidStateException.assert(condition, "Invalid State.");
     }
 
 }

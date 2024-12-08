@@ -7,15 +7,15 @@ export class StringName implements Name {
     protected name: string = "";
     protected noComponents: number = 0;
 
-    constructor(other: string, delimiter?: string) {
-        this.name = other;
+    constructor(source: string, delimiter?: string) {
+        this.name = source;
         if (delimiter === "") {
             throw new Error("Invalid delimiter: must not be empty string.");
         }
         if (delimiter !== undefined) {
             this.delimiter = delimiter;
         }
-        if (other !== "") {
+        if (source !== "") {
             this.noComponents = this.asComponentArray().length;
         }
     }

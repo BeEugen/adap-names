@@ -6,8 +6,8 @@ export class StringArrayName implements Name {
     protected delimiter: string = DEFAULT_DELIMITER;
     protected components: string[] = [];
 
-    constructor(other: string[], delimiter?: string) {
-        this.components = other;
+    constructor(source: string[], delimiter?: string) {
+        this.components = source;
         if (delimiter === "") {
             throw new Error("Invalid delimiter: must not be empty string.");
         }

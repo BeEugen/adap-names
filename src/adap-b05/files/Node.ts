@@ -1,4 +1,3 @@
-import { ExceptionType, AssertionDispatcher } from "../common/AssertionDispatcher";
 import { IllegalArgumentException } from "../common/IllegalArgumentException";
 import { InvalidStateException } from "../common/InvalidStateException";
 import { Exception } from "../common/Exception";
@@ -13,7 +12,8 @@ export class Node {
     protected parentNode: Directory;
 
     constructor(bn: string, pn: Directory) {
-        this.assertIsValidBaseName(bn, ExceptionType.PRECONDITION);
+        // Preconditions
+        this.assertIsNotNullOrUndefinedAsPrecondition(pn);
 
         this.doSetBaseName(bn);
         this.parentNode = pn; // why oh why do I have to set this
@@ -22,31 +22,44 @@ export class Node {
 
     protected initialize(pn: Directory): void {
         this.parentNode = pn;
-        this.parentNode.add(this);
+        this.parentNode.addChildNode(this);
     }
 
     public move(to: Directory): void {
+        // Class Invariants
         this.assertClassInvariants();
+        // Preconditions
+        this.assertIsNotNullOrUndefinedAsPrecondition(to);
 
-        this.parentNode.remove(this);
-        to.add(this);
+        this.parentNode.removeChildNode(this);
+        to.addChildNode(this);
         this.parentNode = to;
 
+        // Class Invariants
         this.assertClassInvariants();
     }
 
     public getFullName(): Name {
+        // Class Invariants
         this.assertClassInvariants();
 
         const result: Name = this.parentNode.getFullName();
         result.append(this.getBaseName());
+
+        // Class Invariants
+        this.assertClassInvariants();
         return result;
     }
 
     public getBaseName(): string {
+        // Class Invariants
         this.assertClassInvariants();
 
-        return this.doGetBaseName();
+        const result = this.doGetBaseName();
+
+        // Class Invariants
+        this.assertClassInvariants();
+        return result;
     }
 
     protected doGetBaseName(): string {
@@ -54,11 +67,12 @@ export class Node {
     }
 
     public rename(bn: string): void {
+        // Class Invariants
         this.assertClassInvariants();
-        this.assertIsValidBaseName(bn, ExceptionType.PRECONDITION)
 
         this.doSetBaseName(bn);
 
+        // Class Invariants
         this.assertClassInvariants();
     }
 
@@ -67,6 +81,7 @@ export class Node {
     }
 
     public getParentNode(): Directory {
+        // Class Invariants
         this.assertClassInvariants();
 
         return this.parentNode;
@@ -77,6 +92,7 @@ export class Node {
      * @param bn basename of node being searched for
      */
     public findNodes(bn: string): Set<Node> {
+        // Class Invariants
         this.assertClassInvariants();
 
         try {
@@ -84,6 +100,7 @@ export class Node {
             const matches = this.findNodesUnchecked(bn);
             matches.forEach(match => result.add(match));
 
+            // Class Invariants
             this.assertClassInvariants();
             return result;
         } catch (ex) {
@@ -92,6 +109,7 @@ export class Node {
     }
 
     public findNodesUnchecked(bn: string): Set<Node> {
+        // Class Invariants
         this.assertClassInvariants();
 
         const result: Set<Node> = new Set<Node>();
@@ -99,18 +117,19 @@ export class Node {
             result.add(this);
         }
 
+        // Class Invariants
         this.assertClassInvariants();
         return result;
     }
 
-    protected assertClassInvariants(): void {
-        const bn: string = this.doGetBaseName();
-        this.assertIsValidBaseName(bn, ExceptionType.CLASS_INVARIANT);
+    protected assertIsNotNullOrUndefinedAsPrecondition(o: Object | null): void {
+        const condition: boolean = (o !== null) && (o !== undefined);
+        IllegalArgumentException.assert(condition, "Argument must not be null or undefined.");
     }
 
-    protected assertIsValidBaseName(bn: string, et: ExceptionType): void {
-        const condition: boolean = (bn != "");
-        AssertionDispatcher.dispatch(et, condition, "invalid base name");
+    protected assertClassInvariants(): void {
+        const condition: boolean = (this.doGetBaseName().trim() !== "");
+        InvalidStateException.assert(condition, "Invalid State.");
     }
 
 }

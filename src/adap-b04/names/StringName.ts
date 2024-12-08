@@ -1,4 +1,5 @@
-import { ESCAPE_CHARACTER } from "../common/Printable";
+import { DEFAULT_DELIMITER, ESCAPE_CHARACTER } from "../common/Printable";
+import { Name } from "./Name";
 import { AbstractName } from "./AbstractName";
 import { IllegalArgumentException } from "../common/IllegalArgumentException";
 import { MethodFailedException } from "../common/MethodFailedException";
@@ -9,10 +10,10 @@ export class StringName extends AbstractName {
     protected name: string = "";
     protected noComponents: number = 0;
 
-    constructor(other: string, delimiter?: string) {
+    constructor(source: string, delimiter?: string) {
         super(delimiter);
-        this.name = other;
-        if (other !== "") {
+        this.name = source;
+        if (source !== "") {
             this.noComponents = this.asComponentArray().length;
         }
 
@@ -63,11 +64,11 @@ export class StringName extends AbstractName {
         this.name = components.join(this.delimiter);
 
         // Postconditions
-        MethodFailedException.assertCondition(
+        MethodFailedException.assert(
             this.noComponents === backup.noComponents,
             "Set new Name component failed."
         );
-        MethodFailedException.assertCondition(
+        MethodFailedException.assert(
             this.getComponent(i) === c,
             "Set new Name component failed."
         );
@@ -79,7 +80,7 @@ export class StringName extends AbstractName {
         // Class Invariants
         this.assertClassInvariants();
         // Preconditions
-        IllegalArgumentException.assertCondition(
+        IllegalArgumentException.assert(
             (i >= 0 && i <= this.noComponents),
             "Index out of bounds.");
         this.assertIsValidComponentAsPrecondition(c);
@@ -92,11 +93,11 @@ export class StringName extends AbstractName {
         this.noComponents++;
 
         // Postconditions
-        MethodFailedException.assertCondition(
+        MethodFailedException.assert(
             this.noComponents === backup.noComponents + 1,
             "Insert new Name component failed."
         );
-        MethodFailedException.assertCondition(
+        MethodFailedException.assert(
             this.getComponent(i) === c,
             "Insert new Name component failed."
         );
@@ -120,11 +121,11 @@ export class StringName extends AbstractName {
         this.noComponents++;
 
         // Postconditions
-        MethodFailedException.assertCondition(
+        MethodFailedException.assert(
             this.noComponents === backup.noComponents + 1,
             "Insert new Name component failed."
         );
-        MethodFailedException.assertCondition(
+        MethodFailedException.assert(
             this.getComponent(backup.noComponents) === c,
             "Insert new Name component failed."
         );
@@ -146,7 +147,7 @@ export class StringName extends AbstractName {
         this.noComponents--;
 
         // Postconditions
-        MethodFailedException.assertCondition(
+        MethodFailedException.assert(
             this.noComponents === backup.noComponents - 1,
             "Insert new Name component failed."
         );
@@ -166,7 +167,7 @@ export class StringName extends AbstractName {
 
     private assertIsValidIndexAsPrecondition(i: number): void {
         let condition: boolean = (i >= 0 && i < this.noComponents);
-        IllegalArgumentException.assertCondition(condition, "Index out of bounds.");
+        IllegalArgumentException.assert(condition, "Index out of bounds.");
     }
 
     protected assertClassInvariants(): void {
@@ -176,14 +177,14 @@ export class StringName extends AbstractName {
     }
 
     private assertIsValidNameAsClassInvariant(): void {
-        InvalidStateException.assertIsNotNullOrUndefined(
-            this.name,
+        InvalidStateException.assert(
+            (this.name !== null) && (this.name !== undefined),
             "Name must not be null or undefined."
         );
     }
 
     private assertIsValidNoComponentsAsClassInvariant(): void {
-        InvalidStateException.assertCondition(
+        InvalidStateException.assert(
             this.noComponents >= 0,
             "Number of Name components must not be a negative value."
         );

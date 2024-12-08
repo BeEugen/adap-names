@@ -1,7 +1,7 @@
 import { Node } from "./Node";
 import { Directory } from "./Directory";
 import { MethodFailedException } from "../common/MethodFailedException";
-import { ExceptionType, AssertionDispatcher } from "../common/AssertionDispatcher";
+import { IllegalArgumentException } from "../common/IllegalArgumentException";
 
 enum FileState {
     OPEN,
@@ -18,15 +18,22 @@ export class File extends Node {
     }
 
     public open(): void {
+        // Class Invariants
         this.assertClassInvariants();
-        AssertionDispatcher.dispatch(ExceptionType.PRECONDITION, this.doGetFileState() === FileState.CLOSED, "File must be closed before it can be opened.");
+        // Preconditions
+        IllegalArgumentException.assert(this.doGetFileState() === FileState.CLOSED, "File must be closed before it can be opened.");
+
         // do something
+
+        // Class Invariants
         this.assertClassInvariants();
     }
 
     public read(noBytes: number): Int8Array {
+        // Class Invariants
         this.assertClassInvariants();
-        AssertionDispatcher.dispatch(ExceptionType.PRECONDITION, noBytes >= 0, "Number of bytes must not be a negative number.");
+        // Preconditions
+        IllegalArgumentException.assert(noBytes >= 0, "Number of bytes must not be a negative number.");
 
         let result: Int8Array = new Int8Array(noBytes);
         // do something
@@ -43,6 +50,7 @@ export class File extends Node {
             }
         }
 
+        // Class Invariants
         this.assertClassInvariants();
         return result;
     }
@@ -52,9 +60,14 @@ export class File extends Node {
     }
 
     public close(): void {
+        // Class Invariants
         this.assertClassInvariants();
-        AssertionDispatcher.dispatch(ExceptionType.PRECONDITION, this.doGetFileState() === FileState.OPEN, "File must be open before it can be closed.");
+        // Preconditions
+        IllegalArgumentException.assert(this.doGetFileState() === FileState.OPEN, "File must be open before it can be closed.");
+
         // do something
+
+        // Class Invariants
         this.assertClassInvariants();
     }
 

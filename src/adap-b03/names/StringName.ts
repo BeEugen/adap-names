@@ -6,10 +6,10 @@ export class StringName extends AbstractName {
     protected name: string = "";
     protected noComponents: number = 0;
 
-    constructor(other: string, delimiter?: string) {
+    constructor(source: string, delimiter?: string) {
         super(delimiter);
-        this.name = other;
-        if (other !== "") {
+        this.name = source;
+        if (source !== "") {
             this.noComponents = this.asComponentArray().length;
         }
     }

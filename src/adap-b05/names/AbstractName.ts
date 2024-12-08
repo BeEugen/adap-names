@@ -192,31 +192,31 @@ export abstract class AbstractName implements Name {
 
     protected assertIsValidDelimiterAsPrecondition(delimiter: string): void {
         let condition: boolean = (delimiter.length === 1);
-        IllegalArgumentException.assertCondition(condition, "Delimiter must be a single character.");
+        IllegalArgumentException.assert(condition, "Delimiter must be a single character.");
     }
 
     protected assertIsValidDelimiterAsPostcondition(delimiter: string): void {
         MethodFailedException.assertIsNotNullOrUndefined(delimiter, "Delimiter must not be null or undefined.");
-        MethodFailedException.assertCondition((this.delimiter.length === 1), "Delimiter must be a single character.");
+        MethodFailedException.assert((this.delimiter.length === 1), "Delimiter must be a single character.");
     }
 
     protected assertIsValidComponentAsPrecondition(c: string): void {
         let condition: boolean = this.isValidComponent(c);
-        IllegalArgumentException.assertCondition(condition, "New Name component must be properly masked.");
+        IllegalArgumentException.assert(condition, "New Name component must be properly masked.");
     }
 
     protected assertIsValidComponentAsPostcondition(c: string): void {
         MethodFailedException.assertIsNotNullOrUndefined(c, "Name component must not be null or undefined.");
-        MethodFailedException.assertCondition(this.isValidComponent(c), "Name component must be properly masked.");
+        MethodFailedException.assert(this.isValidComponent(c), "Name component must be properly masked.");
     }
 
     protected assertIsValidDelimiterAsClassInvariant(): void {
         InvalidStateException.assertIsNotNullOrUndefined(this.delimiter, "Delimiter must not be null or undefined.");
-        InvalidStateException.assertCondition((this.delimiter.length === 1), "Delimiter must be a single character.");
+        InvalidStateException.assert((this.delimiter.length === 1), "Delimiter must be a single character.");
     }
 
     protected assertIsValidNoComponentsAsPostcondition(noComponents: number) {
-        MethodFailedException.assertCondition(noComponents >= 0, "Number of Name components must not be a negative value.");
+        MethodFailedException.assert(noComponents >= 0, "Number of Name components must not be a negative value.");
     }
 
     protected isValidComponent(c: string): boolean {

@@ -4,9 +4,9 @@ export class StringArrayName extends AbstractName {
 
     protected components: string[] = [];
 
-    constructor(other: string[], delimiter?: string) {
+    constructor(source: string[], delimiter?: string) {
         super(delimiter);
-        this.components = other;
+        this.components = source;
     }
 
     public getNoComponents(): number {

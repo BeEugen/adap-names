@@ -8,10 +8,9 @@ export class Node {
     protected parentNode: Directory;
 
     constructor(bn: string, pn: Directory) {
-        IllegalArgumentException.assertIsNotNullOrUndefined(bn);
-        IllegalArgumentException.assertIsNotNullOrUndefined(pn);
-        IllegalArgumentException.assertCondition(!bn.includes("/"), "Base name must not contain '/' character.");
-        IllegalArgumentException.assertCondition(bn.trim() !== "", "Base name must not be empty string.");
+        // Preconditions
+        this.assertIsNotNullOrUndefinedAsPrecondition(bn);
+        this.assertIsNotNullOrUndefinedAsPrecondition(pn);
 
         this.doSetBaseName(bn);
         this.parentNode = pn; // why oh why do I have to set this
@@ -20,14 +19,15 @@ export class Node {
 
     protected initialize(pn: Directory): void {
         this.parentNode = pn;
-        this.parentNode.add(this);
+        this.parentNode.addChildNode(this);
     }
 
     public move(to: Directory): void {
-        IllegalArgumentException.assertIsNotNullOrUndefined(to);
+        // Preconditions
+        this.assertIsNotNullOrUndefinedAsPrecondition(to);
 
-        this.parentNode.remove(this);
-        to.add(this);
+        this.parentNode.removeChildNode(this);
+        to.addChildNode(this);
         this.parentNode = to;
     }
 
@@ -46,9 +46,8 @@ export class Node {
     }
 
     public rename(bn: string): void {
-        IllegalArgumentException.assertIsNotNullOrUndefined(bn);
-        IllegalArgumentException.assertCondition(!bn.includes("/"), "Base name must not contain '/' character.");
-        IllegalArgumentException.assertCondition(bn.trim() !== "", "Base name must not be empty string.");
+        // Preconditions
+        this.assertIsNotNullOrUndefinedAsPrecondition(bn);
 
         this.doSetBaseName(bn);
     }
@@ -59,6 +58,11 @@ export class Node {
 
     public getParentNode(): Directory {
         return this.parentNode;
+    }
+
+    protected assertIsNotNullOrUndefinedAsPrecondition(o: Object | null): void {
+        const condition: boolean = (o != null) && (o != undefined);
+        IllegalArgumentException.assert(condition, "Argument must not be null or undefined.");
     }
 
 }
