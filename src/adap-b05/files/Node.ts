@@ -45,7 +45,6 @@ export class Node {
         this.assertClassInvariants();
 
         const result: Name = this.parentNode.getFullName();
-        console.log("Einzeln: " + result);
         result.append(this.getBaseName());
 
         // Class Invariants
