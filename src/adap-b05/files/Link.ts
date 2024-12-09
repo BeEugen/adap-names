@@ -47,6 +47,8 @@ export class Link extends Node {
     public rename(bn: string): void {
         // Class Invariants
         this.assertClassInvariants();
+        // Preconditions
+        this.assertIsValidBaseNameAsPrecondition(bn);
 
         const target = this.ensureTargetNode(this.targetNode);
         target.rename(bn);

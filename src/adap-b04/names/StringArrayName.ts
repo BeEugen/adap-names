@@ -22,7 +22,7 @@ export class StringArrayName extends AbstractName {
             );
         }
 
-        this.components = source;
+        this.components = [...source];
 
         // Class Invariants
         this.assertClassInvariants();
@@ -44,7 +44,7 @@ export class StringArrayName extends AbstractName {
     public getComponent(i: number): string {
         // Class Invariants
         this.assertClassInvariants();
-        // Precondition
+        // Preconditions
         this.assertIsValidIndexAsPrecondition(i);
 
         const result = this.components[i];
@@ -62,7 +62,7 @@ export class StringArrayName extends AbstractName {
         // Preconditions
         this.assertIsValidIndexAsPrecondition(i);
         this.assertIsValidComponentAsPrecondition(c);
-        // Create Backup for Postcondition
+        // Backup for postconditions
         const backup = this.createBackup();
 
         this.components[i] = c;
@@ -88,7 +88,7 @@ export class StringArrayName extends AbstractName {
             (i >= 0 && i <= this.components.length),
             "Index out of bounds.");
         this.assertIsValidComponentAsPrecondition(c);
-        // Create Backup for Postcondition
+        // Backup for postconditions
         const backup = this.createBackup();
 
         this.components.splice(i, 0, c);
@@ -111,7 +111,7 @@ export class StringArrayName extends AbstractName {
         this.assertClassInvariants();
         // Precondition
         this.assertIsValidComponentAsPrecondition(c);
-        // Create Backup for Postcondition
+        // Backup for postconditions
         const backup = this.createBackup();
 
         this.components.push(c);
@@ -132,9 +132,9 @@ export class StringArrayName extends AbstractName {
     public remove(i: number) {
         // Class Invariants
         this.assertClassInvariants();
-        // Precondition
+        // Preconditions
         this.assertIsValidIndexAsPrecondition(i);
-        // Create Backup for Postcondition
+        // Backup for postcondition
         const backup = this.createBackup();
 
         this.components.splice(i, 1);

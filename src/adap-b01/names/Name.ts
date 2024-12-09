@@ -20,7 +20,7 @@ export class Name {
 
     /** Expects that all Name components are properly masked */
     constructor(other: string[], delimiter?: string) {
-        this.components = other;
+        this.components = [...other];
         if (delimiter === "") {
             throw new Error("Invalid delimiter: must not be empty string.");
         }

@@ -23,6 +23,7 @@ export class Directory extends Node {
         this.assertClassInvariants();
         // Preconditions
         this.assertIsNotNullOrUndefinedAsPrecondition(cn);
+        IllegalArgumentException.assert(!this.hasChildNode(cn), "New node already exists as child node.");
 
         this.childNodes.add(cn);
 

@@ -31,7 +31,7 @@ export class Link extends Node {
 
     public rename(bn: string): void {
         // Preconditions
-        this.assertIsNotNullOrUndefinedAsPrecondition(bn);
+        this.assertIsValidBaseNameAsPrecondition(bn);
 
         const target = this.ensureTargetNode(this.targetNode);
         target.rename(bn);

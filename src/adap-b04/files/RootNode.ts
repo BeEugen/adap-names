@@ -1,6 +1,7 @@
 import { Name } from "../names/Name";
 import { StringName } from "../names/StringName";
 import { Directory } from "./Directory";
+import { IllegalArgumentException } from "../common/IllegalArgumentException";
 
 export class RootNode extends Directory {
 
@@ -23,11 +24,19 @@ export class RootNode extends Directory {
     }
 
     public move(to: Directory): void {
+        // Preconditions
+        throw new IllegalArgumentException("The root directory is not allowed to be moved into another directory.");
+
         // null operation
     }
 
     protected doSetBaseName(bn: string): void {
         // null operation
+    }
+
+    protected assertIsValidBaseNameAsPrecondition(bn: string): void {
+        const condition: boolean = (bn === "");
+        IllegalArgumentException.assert(condition, "Invalid base name.");
     }
 
 }

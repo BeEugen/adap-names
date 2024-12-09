@@ -19,6 +19,7 @@ export class Directory extends Node {
     public addChildNode(cn: Node): void {
         // Preconditions
         this.assertIsNotNullOrUndefinedAsPrecondition(cn);
+        IllegalArgumentException.assert(!this.hasChildNode(cn), "New node already exists as child node.");
 
         this.childNodes.add(cn);
     }
@@ -26,7 +27,7 @@ export class Directory extends Node {
     public removeChildNode(cn: Node): void {
         // Preconditions
         this.assertIsNotNullOrUndefinedAsPrecondition(cn);
-        IllegalArgumentException.assert(this.hasChildNode(cn), "Node must be child node to be removed.");
+        IllegalArgumentException.assert(this.hasChildNode(cn), "Node must exist as child node to be removed.");
 
         this.childNodes.delete(cn); // Yikes! Should have been called remove
     }

@@ -9,10 +9,13 @@ export abstract class AbstractName implements Name {
     protected delimiter: string = DEFAULT_DELIMITER;
 
     constructor(delimiter: string = DEFAULT_DELIMITER) {
-        // Precondition
+        // Preconditions
         this.assertIsValidDelimiterAsPrecondition(delimiter);
 
         this.delimiter = delimiter;
+
+        // Postconditions
+        MethodFailedException.assert(this.delimiter === delimiter, "Failed to set the delimiter character.");
     }
 
     // Returns shallow copy (clone) of this object
@@ -22,8 +25,8 @@ export abstract class AbstractName implements Name {
 
         const result = Object.create(this);
 
-        // Postcondition
-        MethodFailedException.assertIsNotNullOrUndefined(result);
+        // Postconditions
+        MethodFailedException.assert(this.isEqual(result));
         // Class Invariants
         this.assertClassInvariants();
         return result;
@@ -32,7 +35,7 @@ export abstract class AbstractName implements Name {
     public asString(delimiter: string = this.delimiter): string {
         // Class Invariants
         this.assertClassInvariants();
-        // Precondition
+        // Preconditions
         this.assertIsValidDelimiterAsPrecondition(delimiter);
 
         let resultString = "";
@@ -45,8 +48,8 @@ export abstract class AbstractName implements Name {
             }
         }
 
-        // Postcondition
-        MethodFailedException.assertIsNotNullOrUndefined(resultString);
+        // Postconditions
+        this.assertNameStringIsNotNullOrUndefinedAsPostcondition(resultString);
         // Class Invariants
         this.assertClassInvariants();
         return resultString;
@@ -56,13 +59,13 @@ export abstract class AbstractName implements Name {
         // Class Invariants
         this.assertClassInvariants();
 
-        const result = this.asDataString();
+        const resultString = this.asDataString();
 
-        // Postcondition
-        MethodFailedException.assertIsNotNullOrUndefined(result);
+        // Postconditions
+        this.assertNameStringIsNotNullOrUndefinedAsPostcondition(resultString);
         // Class Invariants
         this.assertClassInvariants();
-        return result;
+        return resultString;
     }
 
     public asDataString(): string {
@@ -88,8 +91,8 @@ export abstract class AbstractName implements Name {
             }
         }
 
-        // Postcondition
-        MethodFailedException.assertIsNotNullOrUndefined(resultString);
+        // Postconditions
+        this.assertNameStringIsNotNullOrUndefinedAsPostcondition(resultString);
         // Class Invariants
         this.assertClassInvariants();
         return resultString;
@@ -98,6 +101,8 @@ export abstract class AbstractName implements Name {
     public isEqual(other: Name): boolean {
         // Class Invariants
         this.assertClassInvariants();
+        // Preconditions
+        this.assertIsNotNullOrUndefinedAsPrecondition(other);
 
         const result = this.delimiter === other.getDelimiterCharacter() &&
             this.asDataString() === other.asDataString();
@@ -119,6 +124,8 @@ export abstract class AbstractName implements Name {
             hashCode |= 0;
         }
 
+        // Postconditions
+        MethodFailedException.assert((hashCode >= -2147483648 && hashCode <= 2147483647), "Failed to get a valid hash code.");
         // Class Invariants
         this.assertClassInvariants();
         return hashCode;
@@ -160,6 +167,11 @@ export abstract class AbstractName implements Name {
     public concat(other: Name): void {
         // Class Invariants
         this.assertClassInvariants();
+        // Preconditions
+        this.assertIsNotNullOrUndefinedAsPrecondition(other);
+        // Backup for postconditions
+        const oldNoComponents: number = this.getNoComponents();
+        const otherNoComponents: number = other.getNoComponents();
 
         const otherDelimiter = other.getDelimiterCharacter();
         const needsMaskingAdjustment = this.delimiter !== otherDelimiter;
@@ -176,6 +188,8 @@ export abstract class AbstractName implements Name {
             this.append(component);
         }
 
+        // Postconditions
+        MethodFailedException.assert(this.getNoComponents() === (oldNoComponents + otherNoComponents), "Failed to concat names.");
         // Class Invariants
         this.assertClassInvariants();
     }
@@ -191,12 +205,16 @@ export abstract class AbstractName implements Name {
     protected abstract assertClassInvariants(): void;
 
     protected assertIsValidDelimiterAsPrecondition(delimiter: string): void {
-        let condition: boolean = (delimiter.length === 1);
+        const condition: boolean = (delimiter.length === 1);
         IllegalArgumentException.assert(condition, "Delimiter must be a single character.");
     }
 
+    protected assertIsNotNullOrUndefinedAsPrecondition(arg: any): void {
+        const condition: boolean = (arg !== null) && (arg !== undefined);
+        IllegalArgumentException.assert(condition, "Argument must not be null or undefined.");
+    }
+
     protected assertIsValidDelimiterAsPostcondition(delimiter: string): void {
-        MethodFailedException.assertIsNotNullOrUndefined(delimiter, "Delimiter must not be null or undefined.");
         MethodFailedException.assert((this.delimiter.length === 1), "Delimiter must be a single character.");
     }
 
@@ -205,13 +223,16 @@ export abstract class AbstractName implements Name {
         IllegalArgumentException.assert(condition, "New Name component must be properly masked.");
     }
 
+    protected assertNameStringIsNotNullOrUndefinedAsPostcondition(name: string): void {
+        const condition: boolean = (name !== null) && (name !== undefined);
+        MethodFailedException.assert(condition, "Name string must not be null or undefined.");
+    }
+
     protected assertIsValidComponentAsPostcondition(c: string): void {
-        MethodFailedException.assertIsNotNullOrUndefined(c, "Name component must not be null or undefined.");
         MethodFailedException.assert(this.isValidComponent(c), "Name component must be properly masked.");
     }
 
     protected assertIsValidDelimiterAsClassInvariant(): void {
-        InvalidStateException.assertIsNotNullOrUndefined(this.delimiter, "Delimiter must not be null or undefined.");
         InvalidStateException.assert((this.delimiter.length === 1), "Delimiter must be a single character.");
     }
 

@@ -37,7 +37,7 @@ export class StringName extends AbstractName {
     public getComponent(i: number): string {
         // Class Invariants
         this.assertClassInvariants();
-        // Precondition
+        // Preconditions
         this.assertIsValidIndexAsPrecondition(i);
 
         const components = this.asComponentArray();
@@ -56,7 +56,7 @@ export class StringName extends AbstractName {
         // Preconditions
         this.assertIsValidIndexAsPrecondition(i);
         this.assertIsValidComponentAsPrecondition(c);
-        // Create Backup for Postcondition
+        // Backup for postconditions
         const backup = this.createBackup();
 
         const components = this.asComponentArray();
@@ -84,7 +84,7 @@ export class StringName extends AbstractName {
             (i >= 0 && i <= this.noComponents),
             "Index out of bounds.");
         this.assertIsValidComponentAsPrecondition(c);
-        // Create Backup for Postcondition
+        // Backup for postconditions
         const backup = this.createBackup();
 
         const components = this.asComponentArray();
@@ -108,9 +108,9 @@ export class StringName extends AbstractName {
     public append(c: string) {
         // Class Invariants
         this.assertClassInvariants();
-        // Precondition
+        // Preconditions
         this.assertIsValidComponentAsPrecondition(c);
-        // Create Backup for Postcondition
+        // Backup for postconditions
         const backup = this.createBackup();
 
         if (this.isEmpty()) {
@@ -138,7 +138,7 @@ export class StringName extends AbstractName {
         this.assertClassInvariants();
         // Precondition
         this.assertIsValidIndexAsPrecondition(i);
-        // Create Backup for Postcondition
+        // Backup for postconditions
         const backup = this.createBackup();
 
         const components = this.asComponentArray();

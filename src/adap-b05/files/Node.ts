@@ -13,6 +13,7 @@ export class Node {
 
     constructor(bn: string, pn: Directory) {
         // Preconditions
+        this.assertIsValidBaseNameAsPrecondition(bn);
         this.assertIsNotNullOrUndefinedAsPrecondition(pn);
 
         this.doSetBaseName(bn);
@@ -44,6 +45,7 @@ export class Node {
         this.assertClassInvariants();
 
         const result: Name = this.parentNode.getFullName();
+        console.log("Einzeln: " + result);
         result.append(this.getBaseName());
 
         // Class Invariants
@@ -69,6 +71,8 @@ export class Node {
     public rename(bn: string): void {
         // Class Invariants
         this.assertClassInvariants();
+        // Preconditions
+        this.assertIsValidBaseNameAsPrecondition(bn);
 
         this.doSetBaseName(bn);
 
@@ -122,14 +126,19 @@ export class Node {
         return result;
     }
 
-    protected assertIsNotNullOrUndefinedAsPrecondition(o: Object | null): void {
-        const condition: boolean = (o !== null) && (o !== undefined);
+    protected assertIsValidBaseNameAsPrecondition(bn: string): void {
+        const condition: boolean = (bn.trim() !== "");
+        IllegalArgumentException.assert(condition, "Invalid base name.");
+    }
+
+    protected assertIsNotNullOrUndefinedAsPrecondition(arg: any): void {
+        const condition: boolean = (arg !== null) && (arg !== undefined);
         IllegalArgumentException.assert(condition, "Argument must not be null or undefined.");
     }
 
     protected assertClassInvariants(): void {
         const condition: boolean = (this.doGetBaseName().trim() !== "");
-        InvalidStateException.assert(condition, "Invalid State.");
+        InvalidStateException.assert(condition, "Invalid state.");
     }
 
 }

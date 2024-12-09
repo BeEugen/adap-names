@@ -24,6 +24,9 @@ export class File extends Node {
     }
 
     public read(noBytes: number): Int8Array {
+        // Preconditions
+        IllegalArgumentException.assert(noBytes >= 0, "Number of bytes must not be a negative number.");
+
         // read something
         return new Int8Array();
     }

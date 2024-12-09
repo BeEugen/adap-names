@@ -9,7 +9,7 @@ export class Node {
 
     constructor(bn: string, pn: Directory) {
         // Preconditions
-        this.assertIsNotNullOrUndefinedAsPrecondition(bn);
+        this.assertIsValidBaseNameAsPrecondition(bn);
         this.assertIsNotNullOrUndefinedAsPrecondition(pn);
 
         this.doSetBaseName(bn);
@@ -47,7 +47,7 @@ export class Node {
 
     public rename(bn: string): void {
         // Preconditions
-        this.assertIsNotNullOrUndefinedAsPrecondition(bn);
+        this.assertIsValidBaseNameAsPrecondition(bn);
 
         this.doSetBaseName(bn);
     }
@@ -60,8 +60,13 @@ export class Node {
         return this.parentNode;
     }
 
-    protected assertIsNotNullOrUndefinedAsPrecondition(o: Object | null): void {
-        const condition: boolean = (o != null) && (o != undefined);
+    protected assertIsValidBaseNameAsPrecondition(bn: string): void {
+        const condition: boolean = (bn.trim() !== "");
+        IllegalArgumentException.assert(condition, "Invalid base name.");
+    }
+
+    protected assertIsNotNullOrUndefinedAsPrecondition(arg: any): void {
+        const condition: boolean = (arg !== null) && (arg !== undefined);
         IllegalArgumentException.assert(condition, "Argument must not be null or undefined.");
     }
 

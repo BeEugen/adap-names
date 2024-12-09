@@ -6,7 +6,7 @@ export class StringArrayName extends AbstractName {
 
     constructor(source: string[], delimiter?: string) {
         super(delimiter);
-        this.components = source;
+        this.components = [...source];
     }
 
     public getNoComponents(): number {
