@@ -3,6 +3,7 @@ import { Name } from "./Name";
 import { IllegalArgumentException } from "../common/IllegalArgumentException";
 import { MethodFailedException } from "../common/MethodFailedException";
 import { InvalidStateException } from "../common/InvalidStateException";
+import { AbstractNameBackup } from "./AbstractNameBackup";
 
 export abstract class AbstractName implements Name {
 
@@ -22,19 +23,21 @@ export abstract class AbstractName implements Name {
     public clone(): Name {
         // Class Invariants
         this.assertClassInvariants();
+        const backup: AbstractNameBackup = this.createBackup();
 
-        const result = Object.create(this);
+        const clone = Object.create(this);
 
         // Postconditions
-        MethodFailedException.assert(this.isEqual(result));
+        MethodFailedException.assert(clone.isEqual(this));
         // Class Invariants
-        this.assertClassInvariants();
-        return result;
+        this.assertImmutableAsClassInvariant(backup);
+        return clone;
     }
 
     public asString(delimiter: string = this.delimiter): string {
         // Class Invariants
         this.assertClassInvariants();
+        const backup: AbstractNameBackup = this.createBackup();
         // Preconditions
         this.assertIsValidDelimiterAsPrecondition(delimiter);
 
@@ -51,26 +54,28 @@ export abstract class AbstractName implements Name {
         // Postconditions
         this.assertNameStringIsNotNullOrUndefinedAsPostcondition(resultString);
         // Class Invariants
-        this.assertClassInvariants();
+        this.assertImmutableAsClassInvariant(backup);
         return resultString;
     }
 
     public toString(): string {
         // Class Invariants
         this.assertClassInvariants();
+        const backup: AbstractNameBackup = this.createBackup();
 
         const resultString = this.asDataString();
 
         // Postconditions
         this.assertNameStringIsNotNullOrUndefinedAsPostcondition(resultString);
         // Class Invariants
-        this.assertClassInvariants();
+        this.assertImmutableAsClassInvariant(backup);
         return resultString;
     }
 
     public asDataString(): string {
         // Class Invariants
         this.assertClassInvariants();
+        const backup: AbstractNameBackup = this.createBackup();
 
         const needsMaskingAdjustment = this.delimiter !== DEFAULT_DELIMITER;
         let resultString = "";
@@ -94,27 +99,30 @@ export abstract class AbstractName implements Name {
         // Postconditions
         this.assertNameStringIsNotNullOrUndefinedAsPostcondition(resultString);
         // Class Invariants
-        this.assertClassInvariants();
+        this.assertImmutableAsClassInvariant(backup);
         return resultString;
     }
 
     public isEqual(other: Name): boolean {
         // Class Invariants
         this.assertClassInvariants();
+        const backup: AbstractNameBackup = this.createBackup();
         // Preconditions
         this.assertIsNotNullOrUndefinedAsPrecondition(other);
 
-        const result = this.delimiter === other.getDelimiterCharacter() &&
-            this.asDataString() === other.asDataString();
+        const result = this.asDataString() === other.asDataString() &&
+            this.getNoComponents() === other.getNoComponents() &&
+            this.getDelimiterCharacter() === other.getDelimiterCharacter();
 
         // Class Invariants
-        this.assertClassInvariants();
+        this.assertImmutableAsClassInvariant(backup);
         return result;
     }
 
     public getHashCode(): number {
         // Class Invariants
         this.assertClassInvariants();
+        const backup: AbstractNameBackup = this.createBackup();
 
         let hashCode: number = 0;
         const s: string = this.delimiter + this.asDataString();
@@ -127,46 +135,49 @@ export abstract class AbstractName implements Name {
         // Postconditions
         MethodFailedException.assert((hashCode >= -2147483648 && hashCode <= 2147483647), "Failed to get a valid hash code.");
         // Class Invariants
-        this.assertClassInvariants();
+        this.assertImmutableAsClassInvariant(backup);
         return hashCode;
     }
 
     public isEmpty(): boolean {
         // Class Invariants
         this.assertClassInvariants();
+        const backup: AbstractNameBackup = this.createBackup();
 
         const result = this.getNoComponents() === 0;
 
         // Class Invariants
-        this.assertClassInvariants();
+        this.assertImmutableAsClassInvariant(backup);
         return result;
     }
 
     public getDelimiterCharacter(): string {
         // Class Invariants
         this.assertClassInvariants();
+        const backup: AbstractNameBackup = this.createBackup();
 
         const result = this.delimiter;
 
         // Postcondition
         this.assertIsValidDelimiterAsPostcondition(result);
         // Class Invariants
-        this.assertClassInvariants();
+        this.assertImmutableAsClassInvariant(backup);
         return result;
     }
 
     abstract getNoComponents(): number;
 
     abstract getComponent(i: number): string;
-    abstract setComponent(i: number, c: string): void;
+    abstract setComponent(i: number, c: string): Name;
 
-    abstract insert(i: number, c: string): void;
-    abstract append(c: string): void;
-    abstract remove(i: number): void;
+    abstract insert(i: number, c: string): Name;
+    abstract append(c: string): Name;
+    abstract remove(i: number): Name;
 
-    public concat(other: Name): void {
+    public concat(other: Name): Name {
         // Class Invariants
         this.assertClassInvariants();
+        const backup: AbstractNameBackup = this.createBackup();
         // Preconditions
         this.assertIsNotNullOrUndefinedAsPrecondition(other);
         // Backup for postconditions
@@ -176,6 +187,7 @@ export abstract class AbstractName implements Name {
         const otherDelimiter = other.getDelimiterCharacter();
         const needsMaskingAdjustment = this.delimiter !== otherDelimiter;
 
+        let temp: Name = this.clone();
         for (let i = 0; i < other.getNoComponents(); i++) {
             let component = other.getComponent(i);
             if (needsMaskingAdjustment) {
@@ -185,13 +197,14 @@ export abstract class AbstractName implements Name {
                     this.delimiter
                 );
             }
-            this.append(component);
+            temp = temp.append(component);
         }
 
         // Postconditions
-        MethodFailedException.assert(this.getNoComponents() === (oldNoComponents + otherNoComponents), "Failed to concat names.");
+        MethodFailedException.assert(temp.getNoComponents() === (oldNoComponents + otherNoComponents), "Failed to concat names.");
         // Class Invariants
-        this.assertClassInvariants();
+        this.assertImmutableAsClassInvariant(backup);
+        return temp;
     }
 
     protected unmaskComponent(c: string, delimiter: string): string {
@@ -202,7 +215,10 @@ export abstract class AbstractName implements Name {
         return c.replaceAll(delimiter, ESCAPE_CHARACTER + delimiter);
     }
 
+    protected abstract createBackup(): AbstractNameBackup;
+
     protected abstract assertClassInvariants(): void;
+    protected abstract assertImmutableAsClassInvariant(backup: AbstractNameBackup): void;
 
     protected assertIsValidDelimiterAsPrecondition(delimiter: string): void {
         const condition: boolean = (delimiter.length === 1);

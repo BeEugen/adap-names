@@ -4,6 +4,7 @@ import { AbstractName } from "./AbstractName";
 import { IllegalArgumentException } from "../common/IllegalArgumentException";
 import { MethodFailedException } from "../common/MethodFailedException";
 import { InvalidStateException } from "../common/InvalidStateException";
+import { StringNameBackup } from "./StringNameBackup";
 
 export class StringName extends AbstractName {
 
@@ -24,19 +25,21 @@ export class StringName extends AbstractName {
     public getNoComponents(): number {
         // Class Invariants
         this.assertClassInvariants();
+        const backup: StringNameBackup = this.createBackup();
 
         const result = this.noComponents;
 
         // Postconditions
         this.assertIsValidNoComponentsAsPostcondition(result);
         // Class Invariants
-        this.assertClassInvariants();
+        this.assertImmutableAsClassInvariant(backup);
         return result;
     }
 
     public getComponent(i: number): string {
         // Class Invariants
         this.assertClassInvariants();
+        const backup: StringNameBackup = this.createBackup();
         // Preconditions
         this.assertIsValidIndexAsPrecondition(i);
 
@@ -47,112 +50,115 @@ export class StringName extends AbstractName {
         this.assertIsValidComponentAsPostcondition(result);
         // Class Invariants
         this.assertClassInvariants();
+        this.assertImmutableAsClassInvariant(backup);
         return result;
     }
 
-    public setComponent(i: number, c: string) {
+    public setComponent(i: number, c: string): StringName {
         // Class Invariants
         this.assertClassInvariants();
+        const backup: StringNameBackup = this.createBackup();
         // Preconditions
         this.assertIsValidIndexAsPrecondition(i);
         this.assertIsValidComponentAsPrecondition(c);
-        // Backup for postconditions
-        const backup = this.createBackup();
 
         const components = this.asComponentArray();
         components[i] = c;
-        this.name = components.join(this.delimiter);
+        const newName = components.join(this.delimiter);
+        const result: StringName = new StringName(newName, this.delimiter);
 
         // Postconditions
         MethodFailedException.assert(
-            this.noComponents === backup.noComponents,
+            result.getNoComponents() === backup.getNoComponents(),
             "Set new Name component failed."
         );
         MethodFailedException.assert(
-            this.getComponent(i) === c,
+            result.getComponent(i) === c,
             "Set new Name component failed."
         );
         // Class Invariants
-        this.assertClassInvariants();
+        this.assertImmutableAsClassInvariant(backup);
+        return result;
     }
 
-    public insert(i: number, c: string) {
+    public insert(i: number, c: string): StringName {
         // Class Invariants
         this.assertClassInvariants();
+        const backup: StringNameBackup = this.createBackup();
         // Preconditions
         IllegalArgumentException.assert(
             (i >= 0 && i <= this.noComponents),
             "Index out of bounds.");
         this.assertIsValidComponentAsPrecondition(c);
-        // Backup for postconditions
-        const backup = this.createBackup();
 
         const components = this.asComponentArray();
         components.splice(i, 0, c);
-        this.name = components.join(this.delimiter);
-        this.noComponents++;
+        const newName = components.join(this.delimiter);
+        const result: StringName = new StringName(newName, this.delimiter);
 
         // Postconditions
         MethodFailedException.assert(
-            this.noComponents === backup.noComponents + 1,
+            result.getNoComponents() === backup.getNoComponents() + 1,
             "Insert new Name component failed."
         );
         MethodFailedException.assert(
-            this.getComponent(i) === c,
+            result.getComponent(i) === c,
             "Insert new Name component failed."
         );
         // Class Invariants
-        this.assertClassInvariants();
+        this.assertImmutableAsClassInvariant(backup);
+        return result;
     }
 
-    public append(c: string) {
+    public append(c: string): StringName {
         // Class Invariants
         this.assertClassInvariants();
+        const backup: StringNameBackup = this.createBackup();
         // Preconditions
         this.assertIsValidComponentAsPrecondition(c);
-        // Backup for postconditions
-        const backup = this.createBackup();
 
+        let newName: string = this.name;
         if (this.isEmpty()) {
-            this.name = c;
+            newName = c;
         } else {
-            this.name += this.delimiter + c;
+            newName += this.delimiter + c;
         }
-        this.noComponents++;
+        const result: StringName = new StringName(newName, this.delimiter);
 
         // Postconditions
         MethodFailedException.assert(
-            this.noComponents === backup.noComponents + 1,
+            result.getNoComponents() === backup.getNoComponents() + 1,
             "Insert new Name component failed."
         );
         MethodFailedException.assert(
-            this.getComponent(backup.noComponents) === c,
+            result.getComponent(backup.getNoComponents()) === c,
             "Insert new Name component failed."
         );
         // Class Invariants
-        this.assertClassInvariants();
+        this.assertImmutableAsClassInvariant(backup);
+        return result;
     }
 
-    public remove(i: number) {
+    public remove(i: number): StringName {
         // Class Invariants
         this.assertClassInvariants();
+        const backup: StringNameBackup = this.createBackup();
         // Precondition
         this.assertIsValidIndexAsPrecondition(i);
-        // Backup for postconditions
-        const backup = this.createBackup();
 
         const components = this.asComponentArray();
         components.splice(i, 1);
-        this.name = components.join(this.delimiter);
-        this.noComponents--;
+        const newName = components.join(this.delimiter);
+        const result: StringName = new StringName(newName, this.delimiter);
 
         // Postconditions
         MethodFailedException.assert(
-            this.noComponents === backup.noComponents - 1,
+            result.getNoComponents() === backup.getNoComponents() - 1,
             "Insert new Name component failed."
         );
         // Class Invariants
-        this.assertClassInvariants();
+        this.assertImmutableAsClassInvariant(backup);
+        return result;
     }
 
     private asComponentArray(): string[] {
@@ -190,12 +196,17 @@ export class StringName extends AbstractName {
         );
     }
 
-    private createBackup(): { name: string; delimiter: string, noComponents: number } {
-        return {
-            name: this.name,
-            delimiter: this.delimiter,
-            noComponents: this.noComponents
-        };
+    protected assertImmutableAsClassInvariant(backup: StringNameBackup): void {
+        InvalidStateException.assert(
+            (this.name === backup.getName()) &&
+            (this.noComponents === backup.getNoComponents()) &&
+            (this.delimiter === backup.getDelimiter()),
+            "Immutable StringName must not be modified."
+        );
+    }
+
+    protected createBackup(): StringNameBackup {
+        return new StringNameBackup(this.name, this.noComponents, this.delimiter);
     }
 
 }
