@@ -14,9 +14,7 @@ export class StringName extends AbstractName {
     constructor(source: string, delimiter?: string) {
         super(delimiter);
         this.name = source;
-        if (source !== "") {
-            this.noComponents = this.asComponentArray().length;
-        }
+        this.noComponents = this.asComponentArray().length;
 
         // Class Invariants
         this.assertClassInvariants();

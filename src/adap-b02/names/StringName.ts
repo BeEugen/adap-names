@@ -15,9 +15,7 @@ export class StringName implements Name {
         if (delimiter !== undefined) {
             this.delimiter = delimiter;
         }
-        if (source !== "") {
-            this.noComponents = this.asComponentArray().length;
-        }
+        this.noComponents = this.asComponentArray().length;
     }
 
     public asString(delimiter: string = this.delimiter): string {
